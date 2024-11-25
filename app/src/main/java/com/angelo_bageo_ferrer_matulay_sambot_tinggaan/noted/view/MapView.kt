@@ -1,4 +1,9 @@
 package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view
 
-class MapView {
+import androidx.compose.runtime.Composable
+import androidx.compose.material3.Text
+
+@Composable
+fun MapsScreen() {
+    Text("Maps Screen")
 }

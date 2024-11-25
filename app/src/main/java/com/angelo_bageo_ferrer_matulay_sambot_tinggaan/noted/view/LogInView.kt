@@ -38,6 +38,7 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.Background
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
@@ -46,6 +47,7 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.LandingP
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.ErrorMessage
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
+
 
 
 class LogInView {
