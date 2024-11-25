@@ -8,6 +8,7 @@ class User {
     private var lastName: String
     private var birthDate: LocalDate
     private var password: String
+    private val notes : List<Note>
 
     constructor(email : String, firstName : String, lastName : String, birthDate : LocalDate, password : String){
         this.email = email
@@ -15,6 +16,7 @@ class User {
         this.lastName = lastName
         this.birthDate = birthDate
         this.password = password
+        this.notes = mutableListOf()
     }
 
     fun getEmail() : String {

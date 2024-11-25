@@ -8,12 +8,14 @@ class Note {
     private var date: LocalDate
     private val author : User
     private var isDeleted : Boolean
+    private val type : String
 
-    constructor(title : String, content : String, date : LocalDate, author : User) {
+    constructor(title : String, content : String, date : LocalDate, author : User, type : String) {
         this.title = title
         this.content = content
         this.date = date
         this.author = author
+        this.type = type
         this.isDeleted = false
     }
 
@@ -35,6 +37,10 @@ class Note {
 
     fun isDeleted() : Boolean {
         return this.isDeleted
+    }
+
+    fun getType() : String {
+        return this.type
     }
 
     fun setTitle(title : String) {
