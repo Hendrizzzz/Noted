@@ -109,7 +109,8 @@ class SignUpView {
                     {
                         Text("Close")
                     }
-                }
+                },
+                modifier = Modifier.fillMaxSize().padding(0.dp, 50.dp)
             )
         }
 
@@ -250,16 +251,15 @@ class SignUpView {
                         .width(600.dp)
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.LightGray,
+                        focusedIndicatorColor = LogoColor,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
                     value = email.value,
                     onValueChange = { email.value = it },
                     placeholder = { Text(" Enter Email", fontSize = 16.sp) },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-                    isError = emailError,
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
                     shape = MaterialTheme.shapes.medium,
                     textStyle = TextStyle(fontSize = 16.sp)
                 )
@@ -293,7 +293,7 @@ class SignUpView {
                     placeholder = { Text("Enter First Name", fontSize = 16.sp) },
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = LogoColor,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                     shape = MaterialTheme.shapes.medium,
@@ -322,7 +322,7 @@ class SignUpView {
                     placeholder = { Text("Enter Last Name", fontSize = 16.sp) },
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = LogoColor,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                     shape = MaterialTheme.shapes.medium,
@@ -378,7 +378,7 @@ class SignUpView {
                     },
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = LogoColor,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                     shape = MaterialTheme.shapes.medium,
@@ -427,7 +427,7 @@ class SignUpView {
                     },
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = LogoColor,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                     shape = MaterialTheme.shapes.medium,
@@ -485,7 +485,7 @@ class SignUpView {
                     },
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = LogoColor,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                     shape = MaterialTheme.shapes.medium,
