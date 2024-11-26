@@ -1,11 +1,14 @@
 package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.core.content.ContextCompat.startActivity
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.main.MainController
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.model.User
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.LogInView
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.SignUpView
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.SplashScreen
 import com.google.firebase.auth.FirebaseAuth
 
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,8 +16,23 @@ import com.google.firebase.firestore.FirebaseFirestore
 class AuthenticationController {
     private val logInView = LogInView()
     private val signUpView = SignUpView()
-    private val mainController = MainController()
+    private val mainController = MainController(this)
     private var auth = FirebaseAuth.getInstance()
+
+
+    fun isUserAuthenticated(): Boolean {
+        val currentUser = auth.currentUser
+        return currentUser != null
+    }
+
+    fun logOut(context: Context) {
+        auth.signOut()
+
+        val intent = Intent(context, SplashScreen::class.java)
+        context.startActivity(intent)
+    }
+
+
 
 
     @Composable
@@ -92,10 +110,4 @@ class AuthenticationController {
                 }
             }
     }
-
-
-
-
-
-
 }

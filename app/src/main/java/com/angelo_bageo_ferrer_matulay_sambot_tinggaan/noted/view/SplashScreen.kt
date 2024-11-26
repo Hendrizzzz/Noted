@@ -37,11 +37,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.BackgroundColor
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
-
 
 class SplashScreen : ComponentActivity() {
     val landingPageController = AuthenticationController()
@@ -50,56 +53,58 @@ class SplashScreen : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ShowSplashScreen();
+            val navController = rememberNavController()
 
-        }
-
-
-    }
-
-    @Preview
-    @Composable
-    fun ShowSplashScreen() {
-        val isLoading = remember { mutableStateOf(true) }
-        val buttonYOffset = remember { mutableStateOf(200.dp) }
-
-        val currentScreen = remember { mutableStateOf("Splash") }
-
-        LaunchedEffect(Unit) {
-            delay(2000)
-            isLoading.value = false
-        }
-
-
-        when (currentScreen.value) {
-            "LogIn" -> landingPageController.OnLogInClick()
-            "SignUp" -> landingPageController.OnSignUpClick()
-            else -> {
-                // Show the splash screen initially
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(BackgroundColor)
-                ) {
-                    ShowLogo()
-                    ShowLoadingIconAnimation(isLoading)
-                    ShowButtons(isLoading, currentScreen, buttonYOffset)
+            NavHost(navController = navController, startDestination = "splash") {
+                composable("splash") {
+                    ShowSplashScreen(navController)
+                }
+                composable("login") {
+                    landingPageController.OnLogInClick()
+                }
+                composable("home") {
+                    landingPageController.GoToHomePage()
+                }
+                composable("signup") {
+                    landingPageController.OnSignUpClick()
                 }
             }
         }
     }
 
+    @Composable
+    fun ShowSplashScreen(navController: NavHostController) {
+        val isLoading = remember { mutableStateOf(true) }
+        val buttonYOffset = remember { mutableStateOf(200.dp) }
+
+        LaunchedEffect(Unit) {
+            delay(2000)
+            isLoading.value = false
+
+            if (landingPageController.isUserAuthenticated())
+                navController.navigate("home")
+        }
+
+        // Show splash screen UI
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundColor)
+        ) {
+            ShowLogo()
+            ShowLoadingIconAnimation(isLoading)
+            if (!landingPageController.isUserAuthenticated())
+                ShowButtons(isLoading, navController, buttonYOffset)
+        }
+    }
 
     @Composable
     fun ShowButtons(
         isLoading: MutableState<Boolean>,
-        currentScreen: MutableState<String>,
+        navController: NavHostController,
         buttonYOffset: MutableState<Dp>
     ) {
-        // Buttons (Slide up after 2 seconds)
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             AnimatedVisibility(
                 visible = !isLoading.value,
                 enter = slideInVertically(
@@ -118,50 +123,35 @@ class SplashScreen : ComponentActivity() {
                 ) {
                     Button(
                         onClick = {
-                            currentScreen.value = "LogIn"
+                            navController.navigate("login")
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = LogoColor
-                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = LogoColor),
                         modifier = Modifier.width(200.dp),
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            text = "Log In",
-                            color = Color.White
-                        )
+                        Text(text = "Log In", color = Color.White)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
                         onClick = {
-                            currentScreen.value = "SignUp"
+                            navController.navigate("signup")
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
-                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                         modifier = Modifier.width(200.dp),
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            text = "Sign Up",
-                            color = LogoColor,
-                        )
+                        Text(text = "Sign Up", color = LogoColor)
                     }
-
                 }
             }
         }
     }
 
-
     @Composable
     fun ShowLogo() {
-        // Logo
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Image(
                 painter = painterResource(id = R.drawable.noted_logo),
                 contentDescription = "App Logo",
@@ -175,10 +165,7 @@ class SplashScreen : ComponentActivity() {
 
     @Composable
     fun ShowLoadingIconAnimation(isLoading: MutableState<Boolean>) {
-        // Loading icon
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             AnimatedVisibility(
                 visible = isLoading.value,
                 enter = fadeIn(tween(durationMillis = 0)),
@@ -193,6 +180,4 @@ class SplashScreen : ComponentActivity() {
             }
         }
     }
-
-
 }
