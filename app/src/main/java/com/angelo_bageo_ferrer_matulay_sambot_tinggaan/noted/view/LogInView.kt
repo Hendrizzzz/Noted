@@ -38,12 +38,11 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.Background
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.zIndex
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.LandingPageController
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.ErrorMessage
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
@@ -62,8 +61,8 @@ class LogInView {
         val currentScreen = remember { mutableStateOf("LogIn") }
 
         when (currentScreen.value) {
-            "SignUp" -> LandingPageController().OnSignUpClick()
-            "Home" -> LandingPageController().GoToHomePage()
+            "SignUp" -> AuthenticationController().OnSignUpClick()
+            "Home" -> AuthenticationController().GoToHomePage()
             else -> LogInScreen(currentScreen)
         }
     }
@@ -122,13 +121,13 @@ class LogInView {
             // Log In Button
             Button(
                 onClick = {
-                    val isValidated = LandingPageController().validateLogin(email, password)
-
-                    if (isValidated)
-                        currentScreen.value = "Home"
-                    else {
-                        errorMessage = "Invalid email or password. Please try again."
-                        isErrorVisible = true
+                    AuthenticationController().validateLogin(email, password) { isSuccess ->
+                        if (isSuccess)
+                            currentScreen.value = "Home"
+                        else {
+                            errorMessage = "Invalid email or password. Please try again."
+                            isErrorVisible = true
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = LogoColor),

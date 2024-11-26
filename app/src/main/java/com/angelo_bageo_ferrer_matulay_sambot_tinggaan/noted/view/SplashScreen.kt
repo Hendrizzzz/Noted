@@ -37,14 +37,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.LandingPageController
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.BackgroundColor
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
 
 
 class SplashScreen : ComponentActivity() {
-    val landingPageController = LandingPageController()
+    val landingPageController = AuthenticationController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

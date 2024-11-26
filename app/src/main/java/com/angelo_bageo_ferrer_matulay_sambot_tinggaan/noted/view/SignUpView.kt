@@ -53,7 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.LandingPageController
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.BackgroundColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -66,6 +66,7 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
 import java.util.Calendar
 
+// TODO : ADD A LOADING BUTTON WHEN SIGNING UP OR LOGGING IN
 
 class SignUpView {
 
@@ -115,8 +116,8 @@ class SignUpView {
         }
 
         when (currentScreen.value) {
-            "LogIn" -> LandingPageController().OnLogInClick()
-            "Home" -> LandingPageController().GoToHomePage()
+            "LogIn" -> AuthenticationController().OnLogInClick()
+            "Home" -> AuthenticationController().GoToHomePage()
             else -> SignUpScreen(
                 currentScreen,
                 showTermsAndPolicies,
@@ -565,20 +566,20 @@ class SignUpView {
                             errorMessage.value = "You must agree to the terms and conditions"
                             isErrorVisible = true
                         } else {
-                            val isCredentialsValid = LandingPageController().
-                                validateCredentials (
-                                    email.value.text,
-                                    firstName.value,
-                                    lastName.value,
-                                    birthDate.value,
-                                    password.value
-                                )
-                            if (isCredentialsValid) {
-                                currentScreen.value = "Home"
-                                isErrorVisible = false
-                            } else {
-                                errorMessage.value = "Account already exists"
-                                isErrorVisible = true
+                            AuthenticationController().validateCredentials(
+                                email.value.text,
+                                firstName.value,
+                                lastName.value,
+                                birthDate.value,
+                                password.value
+                            ) { isSuccess ->
+                                if (isSuccess) {
+                                    currentScreen.value = "Home"
+                                    isErrorVisible = false
+                                } else {
+                                    errorMessage.value = "Account already exists"
+                                    isErrorVisible = true
+                                }
                             }
                         }
                     },
