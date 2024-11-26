@@ -14,7 +14,7 @@ Download it here [Firebase Console](https://console.firebase.google.com/u/0/proj
 ![image](https://github.com/user-attachments/assets/ee33bb67-9df6-48dd-bca6-2b00ff70cbf0)
 
 
-### 2. **Place the `google-services.json` File in the `app/` Directory**
+**Place the `google-services.json` File in the `app/` Directory**
  The directory structure should look like this:
 
 ```bash
