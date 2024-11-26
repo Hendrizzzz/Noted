@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/17941b2f-b3d7-4c87-9f3c-703fef870576)# Android AR App
+# Android AR App
 
 ## Overview
 
@@ -8,6 +8,9 @@ This repository contains the source code for the Android AR App. In order to run
  **Get the `google-services.json` File**
 
 Download it here [Firebase Console](https://console.firebase.google.com/u/0/project/noted-abfmsthci/settings/general/android:com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted).
+
+
+
 ![image](https://github.com/user-attachments/assets/ee33bb67-9df6-48dd-bca6-2b00ff70cbf0)
 
 
