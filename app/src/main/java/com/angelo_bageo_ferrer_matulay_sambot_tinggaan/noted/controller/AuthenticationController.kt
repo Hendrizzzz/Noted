@@ -13,9 +13,9 @@ import com.google.firebase.auth.FirebaseAuth
 
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AuthenticationController {
-    private val logInView = LogInView()
-    private val signUpView = SignUpView()
+class AuthenticationController() {
+    private val logInView = LogInView(this)
+    private val signUpView = SignUpView(this)
     private val mainController = MainController(this)
     private var auth = FirebaseAuth.getInstance()
 
@@ -25,11 +25,8 @@ class AuthenticationController {
         return currentUser != null
     }
 
-    fun logOut(context: Context) {
+    fun logOut() {
         auth.signOut()
-
-        val intent = Intent(context, SplashScreen::class.java)
-        context.startActivity(intent)
     }
 
 
@@ -87,7 +84,6 @@ class AuthenticationController {
 
                         Log.v("Time to log the details of the user", "Time to log the details of the user")
 
-                        // Save to Firestore
                         val db = FirebaseFirestore.getInstance()
                         db.collection("users")
                             .document(userId)

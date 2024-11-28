@@ -49,7 +49,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
@@ -68,9 +67,8 @@ import java.util.Calendar
 
 // TODO : ADD A LOADING BUTTON WHEN SIGNING UP OR LOGGING IN
 
-class SignUpView {
+class SignUpView(private val authenticationController: AuthenticationController) {
 
-    @Preview
     @Composable
     fun DisplayView() {
         var currentScreen = remember { mutableStateOf("SignUp") }
@@ -116,8 +114,8 @@ class SignUpView {
         }
 
         when (currentScreen.value) {
-            "LogIn" -> AuthenticationController().OnLogInClick()
-            "Home" -> AuthenticationController().GoToHomePage()
+            "LogIn" -> authenticationController.OnLogInClick()
+            "Home" -> authenticationController.GoToHomePage()
             else -> SignUpScreen(
                 currentScreen,
                 showTermsAndPolicies,
@@ -566,7 +564,7 @@ class SignUpView {
                             errorMessage.value = "You must agree to the terms and conditions"
                             isErrorVisible = true
                         } else {
-                            AuthenticationController().validateCredentials(
+                            authenticationController.validateCredentials(
                                 email.value.text,
                                 firstName.value,
                                 lastName.value,

@@ -46,34 +46,30 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.Background
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
 
-class SplashScreen : ComponentActivity() {
-    val landingPageController = AuthenticationController()
+class SplashScreen(private val authenticationController: AuthenticationController) {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    @Composable
+    fun DisplayView() {
+        val navController = rememberNavController()
 
-        setContent {
-            val navController = rememberNavController()
-
-            NavHost(navController = navController, startDestination = "splash") {
-                composable("splash") {
-                    ShowSplashScreen(navController)
-                }
-                composable("login") {
-                    landingPageController.OnLogInClick()
-                }
-                composable("home") {
-                    landingPageController.GoToHomePage()
-                }
-                composable("signup") {
-                    landingPageController.OnSignUpClick()
-                }
+        NavHost(navController = navController, startDestination = "splash") {
+            composable("splash") {
+                ShowSplashScreen(navController)
+            }
+            composable("login") {
+                authenticationController.OnLogInClick()
+            }
+            composable("home") {
+                authenticationController.GoToHomePage()
+            }
+            composable("signup") {
+                authenticationController.OnSignUpClick()
             }
         }
     }
 
     @Composable
-    fun ShowSplashScreen(navController: NavHostController) {
+    private fun ShowSplashScreen(navController: NavHostController) {
         val isLoading = remember { mutableStateOf(true) }
         val buttonYOffset = remember { mutableStateOf(200.dp) }
 
@@ -81,7 +77,7 @@ class SplashScreen : ComponentActivity() {
             delay(2000)
             isLoading.value = false
 
-            if (landingPageController.isUserAuthenticated())
+            if (authenticationController.isUserAuthenticated())
                 navController.navigate("home")
         }
 
@@ -93,13 +89,13 @@ class SplashScreen : ComponentActivity() {
         ) {
             ShowLogo()
             ShowLoadingIconAnimation(isLoading)
-            if (!landingPageController.isUserAuthenticated())
+            if (!authenticationController.isUserAuthenticated())
                 ShowButtons(isLoading, navController, buttonYOffset)
         }
     }
 
     @Composable
-    fun ShowButtons(
+    private fun ShowButtons(
         isLoading: MutableState<Boolean>,
         navController: NavHostController,
         buttonYOffset: MutableState<Dp>
@@ -150,7 +146,7 @@ class SplashScreen : ComponentActivity() {
     }
 
     @Composable
-    fun ShowLogo() {
+    private fun ShowLogo() {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
                 painter = painterResource(id = R.drawable.noted_logo),
@@ -164,7 +160,7 @@ class SplashScreen : ComponentActivity() {
     }
 
     @Composable
-    fun ShowLoadingIconAnimation(isLoading: MutableState<Boolean>) {
+    private fun ShowLoadingIconAnimation(isLoading: MutableState<Boolean>) {
         Box(modifier = Modifier.fillMaxSize()) {
             AnimatedVisibility(
                 visible = isLoading.value,

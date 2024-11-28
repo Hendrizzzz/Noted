@@ -49,20 +49,19 @@ import kotlinx.coroutines.delay
 
 
 
-class LogInView {
+class LogInView(private val authenticationController: AuthenticationController) {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var errorMessage by mutableStateOf("")
     var isErrorVisible by mutableStateOf(false)
 
-    @Preview
     @Composable
     fun DisplayView() {
         val currentScreen = remember { mutableStateOf("LogIn") }
 
         when (currentScreen.value) {
-            "SignUp" -> AuthenticationController().OnSignUpClick()
-            "Home" -> AuthenticationController().GoToHomePage()
+            "SignUp" -> authenticationController.OnSignUpClick()
+            "Home" -> authenticationController.GoToHomePage()
             else -> LogInScreen(currentScreen)
         }
     }
@@ -121,7 +120,7 @@ class LogInView {
             // Log In Button
             Button(
                 onClick = {
-                    AuthenticationController().validateLogin(email, password) { isSuccess ->
+                    authenticationController.validateLogin(email, password) { isSuccess ->
                         if (isSuccess)
                             currentScreen.value = "Home"
                         else {
