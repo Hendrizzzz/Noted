@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "74971059443",
+    "project_id": "noted-abfmsthci",
+    "storage_bucket": "noted-abfmsthci.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74971059443:android:b3c1e4478c038f23769386",
+        "android_client_info": {
+          "package_name": "com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyWhIW95WlG_WvJyiHDgJYMPuYrwnRAiU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

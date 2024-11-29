@@ -16,8 +16,8 @@ buildscript {
     }
     dependencies {
         // Firebase plugin for Google services
-        classpath("com.google.gms:google-services:4.4.2")
-        classpath("com.google.gms:google-services:<latest-version>")
-
+        classpath(libs.google.services.v442)
+        classpath(libs.gms.google.services)
+        classpath(libs.gradle)
     }
 }

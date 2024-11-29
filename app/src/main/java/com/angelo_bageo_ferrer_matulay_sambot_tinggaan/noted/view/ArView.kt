@@ -5,14 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 
-class ARView : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Surface(color = MaterialTheme.colorScheme.background) {
-                ARScreen() // Calls the AR
-            }
+class ARView() {
+    @Composable
+    fun DisplayView() {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ARScreen() // Calls the AR
         }
     }
 }

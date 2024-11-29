@@ -1,5 +1,10 @@
 [versions]
 agp = "8.7.2"
+arCoreVersion = "1.4.0"
+coreVersion = "1.46.0"
+googleServices = "4.4.2"
+googleServicesVersion = "<latest-version>"
+gradle = "8.1.4"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -9,9 +14,15 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.04.01"
 core = "1.17.1"
+sceneformUx = "1.16.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+ar-core = { module = "com.google.ar:core", version.ref = "coreVersion" }
+github-ar-core = { module = "io.github.sceneview:ar-core", version.ref = "arCoreVersion" }
+gms-google-services = { module = "com.google.gms:google-services", version.ref = "googleServicesVersion" }
+google-services-v442 = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -26,6 +37,8 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 core = { group = "com.google.ar.sceneform", name = "core", version.ref = "core" }
+sceneform-ux = { module = "com.google.ar.sceneform:sceneform-ux", version.ref = "sceneformUx" }
+sceneview = { module = "io.github.sceneview:sceneview", version.ref = "arCoreVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
