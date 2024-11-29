@@ -1,6 +1,5 @@
 package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view
 
-import android.content.Context
 import android.util.Log
 import android.widget.TextView
 import androidx.compose.foundation.background
@@ -18,13 +17,24 @@ import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.rendering.ViewRenderable
 
-
 @Composable
 fun ARScreen() {
     val context = LocalContext.current
     var noteText by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
     var arSceneView: ArSceneView? by remember { mutableStateOf(null) }
+
+    // Set up AR Scene
+    LaunchedEffect(context) {
+        arSceneView?.let {
+            if (it.session == null) {
+                Log.e("ARScreen", "AR session is not initialized")
+            } else {
+                // Initialize session if not yet initialized
+                Log.d("ARScreen", "AR session initialized")
+            }
+        }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -41,13 +51,18 @@ fun ARScreen() {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
-                    ArSceneView(ctx).also { sceneView ->
-                        sceneView.resume() // Ensure ARSceneView resumes correctly
-                        arSceneView = sceneView
+                    ArSceneView(ctx).apply {
+                        resume()  // Ensure ArSceneView is resumed when created
+                        arSceneView = this
                     }
                 },
                 update = { sceneView ->
                     // Handle updates to ArSceneView if needed
+                    arSceneView?.let {
+                        if (it.session == null) {
+                            Log.e("ARScreen", "AR session is null.")
+                        }
+                    }
                 }
             )
 
@@ -65,6 +80,33 @@ fun ARScreen() {
         }
     }
 }
+
+private fun addNoteToScene(context: android.content.Context, arSceneView: ArSceneView?, noteText: String) {
+    if (arSceneView == null || arSceneView.session == null) return
+
+    // Create an AR anchor (pose)
+    val pose = Pose(floatArrayOf(0f, -0.5f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
+    val anchor = arSceneView.session?.createAnchor(pose)
+    val anchorNode = AnchorNode(anchor).apply {
+        setParent(arSceneView.scene)  // Attach to the scene
+    }
+
+    // Build the renderable and attach it to the anchor node
+    ViewRenderable.builder()
+        .setView(context, R.layout.ar_note_layout)
+        .build()
+        .thenAccept { renderable ->
+            renderable.view.findViewById<TextView>(R.id.noteTitle).text = "Note"
+            renderable.view.findViewById<TextView>(R.id.noteDescription).text = noteText
+            anchorNode.renderable = renderable
+        }
+        .exceptionally { throwable ->
+            Log.e("ARScreen", "Unable to load renderable", throwable)
+            null
+        }
+}
+
+
 
 @Composable
 fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
@@ -98,28 +140,4 @@ fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
     )
 }
 
-private fun addNoteToScene(context: android.content.Context, arSceneView: ArSceneView?, noteText: String) {
-    if (arSceneView == null || arSceneView.session == null) return
-
-    // Create an AR anchor
-    val pose = Pose(floatArrayOf(0f, -0.5f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
-    val anchor = arSceneView.session?.createAnchor(pose)
-    val anchorNode = AnchorNode(anchor).apply {
-        setParent(arSceneView.scene) // Attach to the scene
-    }
-
-    // Build the renderable and attach it to the anchor node
-    ViewRenderable.builder()
-        .setView(context, R.layout.ar_note_layout)
-        .build()
-        .thenAccept { renderable ->
-            renderable.view.findViewById<TextView>(R.id.noteTitle).text = "Note"
-            renderable.view.findViewById<TextView>(R.id.noteDescription).text = noteText
-            anchorNode.renderable = renderable
-        }
-        .exceptionally { throwable ->
-            Log.e("ARScreen", "Unable to load renderable", throwable)
-            null
-        }
-}
 
