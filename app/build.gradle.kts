@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted"
@@ -42,14 +42,11 @@ android {
 }
 
 dependencies {
-
+    implementation("com.google.ar:core:1.37.0")
+    implementation("com.google.ar.sceneform:sceneform-ux:1.17.1")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-firestore")
 
-    implementation(libs.ar.core) // ARCore SDK
-    implementation(libs.sceneform.ux) // Last supported Sceneform version
-    implementation(libs.sceneview) // SceneView version
-    implementation(libs.github.ar.core)  // Matching ARCore support
 
     implementation("com.google.firebase:firebase-auth-ktx")
 

@@ -6,6 +6,6 @@ import androidx.compose.material3.Text
 class MapView {
     @Composable
     fun MapsScreen() {
-        Text("Maps Screen")
+        Text("Maps Screen") // placeholder
     }
 }

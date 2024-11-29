@@ -1,10 +1,13 @@
 package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.main
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -15,11 +18,11 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.SelectedColor
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.AccountView
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.ArView
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.ARView
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.MapView
 
 class MainController(private val authenticationController: AuthenticationController) {
-    private val arView = ArView()
+    private val arView = ARView()
     private val mapView = MapView()
     private val accountView = AccountView()
 
@@ -46,7 +49,7 @@ class MainController(private val authenticationController: AuthenticationControl
                 startDestination = "ar",
                 Modifier.padding(innerPadding)
             ) {
-                composable("ar") { arView.ARScreen() }
+                composable("ar") { arView.DisplayView() }
                 composable("accounts") { accountView.AccountScreen(authenticationController) }
                 composable("maps") { mapView.MapsScreen() }
             }
@@ -56,9 +59,17 @@ class MainController(private val authenticationController: AuthenticationControl
     @Composable
     fun BottomNavigationBar(selectedButton: String, onButtonClick: (String) -> Unit) {
         NavigationBar(
-            modifier = Modifier.height(55.dp)
+            modifier = Modifier
+                .height(55.dp)
+                .drawBehind {
+                    drawLine(
+                        color = Color.Black,
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, 0f),
+                        strokeWidth = 4f
+                    )
+                }
         ) {
-
             NavigationBarItem(
                 selected = false,
                 onClick = { onButtonClick("Maps") },
