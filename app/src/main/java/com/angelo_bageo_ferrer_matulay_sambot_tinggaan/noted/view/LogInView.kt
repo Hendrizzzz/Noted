@@ -120,6 +120,7 @@ class LogInView(private val authenticationController: AuthenticationController) 
             // Log In Button
             Button(
                 onClick = {
+                    try {
                     authenticationController.validateLogin(email, password) { isSuccess ->
                         if (isSuccess)
                             currentScreen.value = "Home"
@@ -127,6 +128,10 @@ class LogInView(private val authenticationController: AuthenticationController) 
                             errorMessage = "Invalid email or password. Please try again."
                             isErrorVisible = true
                         }
+                    }
+                        } catch (exception : IllegalArgumentException) {
+                            errorMessage = exception.message.toString()
+                            isErrorVisible = true
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = LogoColor),

@@ -43,6 +43,9 @@ class AuthenticationController() {
     }
 
     fun validateLogin(email: String, password: String, callback: (Boolean) -> Unit) {
+        if (email.isEmpty() || password.isEmpty())
+            throw IllegalArgumentException("Email and password cannot be empty.")
+
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
