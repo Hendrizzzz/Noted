@@ -219,9 +219,9 @@ class SignUpView(private val authenticationController: AuthenticationController)
                     .verticalScroll(scrollState)
                     .padding
                         (
-                        screenWidth * 0.05f + 16.dp,
+                        0.dp,
                         (screenHeight * 0.01f) + 166.dp,
-                        screenWidth * 0.05f + 16.dp,
+                        0.dp,
                         16.dp
                         )
                     .align(Alignment.Center)
