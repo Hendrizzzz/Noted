@@ -71,8 +71,11 @@ class MainController(private val authenticationController: AuthenticationControl
                 }
         ) {
             NavigationBarItem(
-                selected = false,
-                onClick = { onButtonClick("Maps") },
+                selected = selectedButton == "Maps", // Determine if the item is selected
+                onClick = {
+                    // Immediately update the selected button without animation
+                    onButtonClick("Maps")
+                },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.map),
@@ -83,8 +86,11 @@ class MainController(private val authenticationController: AuthenticationControl
                 modifier = Modifier.padding(7.5.dp)
             )
             NavigationBarItem(
-                selected = false,
-                onClick = { onButtonClick("Ar") },
+                selected = selectedButton == "Ar", // Determine if the item is selected
+                onClick = {
+                    // Immediately update the selected button without animation
+                    onButtonClick("Ar")
+                },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_add_notes),
@@ -95,8 +101,11 @@ class MainController(private val authenticationController: AuthenticationControl
                 modifier = Modifier.padding(7.5.dp)
             )
             NavigationBarItem(
-                selected = false,
-                onClick = { onButtonClick("Accounts") },
+                selected = selectedButton == "Accounts", // Determine if the item is selected
+                onClick = {
+                    // Immediately update the selected button without animation
+                    onButtonClick("Accounts")
+                },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_account),
@@ -108,4 +117,5 @@ class MainController(private val authenticationController: AuthenticationControl
             )
         }
     }
+
 }

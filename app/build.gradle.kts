@@ -42,25 +42,16 @@ android {
 }
 
 dependencies {
+
+    // AR Dependencies
     implementation ("com.google.ar:core:1.46.0")
 
+    // Firebase Dependencies
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-firestore")
-
-
     implementation("com.google.firebase:firebase-auth-ktx")
-
-    // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
-
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
-
-
-    // Add the dependencies for any other desired Firebase products
-    // https://firebase.google.com/docs/android/setup#available-libraries
 
     implementation ("androidx.compose.foundation:foundation:1.7.5")
     implementation ("androidx.compose.material:material:1.4.0")

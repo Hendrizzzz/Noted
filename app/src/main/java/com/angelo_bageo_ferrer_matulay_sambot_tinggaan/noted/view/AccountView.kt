@@ -23,6 +23,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +34,10 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.AccountHeaderColor
 
 class AccountView {
+
+    val customFontFamily = FontFamily(
+        Font(R.font.inter)
+    )
 
     @Preview
     @Composable
@@ -68,11 +74,13 @@ class AccountView {
             // Center Text ("Account")
             Text(
                 text = "Account",
-                style = MaterialTheme.typography.titleLarge, // Use MaterialTheme for consistent styling
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = customFontFamily,
+                    fontWeight = FontWeight.W900,   // Optional: Apply custom weight
+                ),
                 textAlign = TextAlign.Center,
                 color = Color.Black,
-                fontWeight = FontWeight.W900,
-                fontSize = 20.sp
+                fontSize = 26.sp
             )
 
             // Settings Icon on the right
