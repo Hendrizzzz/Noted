@@ -42,8 +42,8 @@ android {
 }
 
 dependencies {
-    implementation("com.google.ar:core:1.37.0")
-    implementation("com.google.ar.sceneform:sceneform-ux:1.17.1")
+    implementation ("com.google.ar:core:1.46.0")
+
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-firestore")
 

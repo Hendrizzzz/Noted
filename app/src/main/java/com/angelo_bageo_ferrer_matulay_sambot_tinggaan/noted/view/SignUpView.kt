@@ -57,7 +57,6 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.Background
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.window.Popup
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.ErrorMessage
