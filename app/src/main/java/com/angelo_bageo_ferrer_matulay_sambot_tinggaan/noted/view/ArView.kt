@@ -11,7 +11,7 @@ class ARView : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Surface(color = MaterialTheme.colorScheme.background) {
-                ARScreen() // Calls the AR composable you have
+                ARScreen() // Calls the AR
             }
         }
     }

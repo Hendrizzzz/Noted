@@ -7,7 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,11 +14,15 @@ import androidx.navigation.compose.rememberNavController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.SelectedColor
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.ARScreen
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.AccountScreen
-import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.MapsScreen
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.AccountView
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.ArView
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.MapView
 
 class MainController(private val authenticationController: AuthenticationController) {
+    private val arView = ArView()
+    private val mapView = MapView()
+    private val accountView = AccountView()
+
     @Composable
     fun AppNavigation() {
         val navController = rememberNavController()
@@ -43,9 +46,9 @@ class MainController(private val authenticationController: AuthenticationControl
                 startDestination = "ar",
                 Modifier.padding(innerPadding)
             ) {
-                composable("ar") { ARScreen() }
-                composable("accounts") { AccountScreen(authenticationController) }
-                composable("maps") { MapsScreen() }
+                composable("ar") { arView.ARScreen() }
+                composable("accounts") { accountView.AccountScreen(authenticationController) }
+                composable("maps") { mapView.MapsScreen() }
             }
         }
     }

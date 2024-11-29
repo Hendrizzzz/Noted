@@ -49,7 +49,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
@@ -68,9 +67,8 @@ import java.util.Calendar
 
 // TODO : ADD A LOADING BUTTON WHEN SIGNING UP OR LOGGING IN
 
-class SignUpView {
+class SignUpView(private val authenticationController: AuthenticationController) {
 
-    @Preview
     @Composable
     fun DisplayView() {
         var currentScreen = remember { mutableStateOf("SignUp") }
@@ -116,8 +114,8 @@ class SignUpView {
         }
 
         when (currentScreen.value) {
-            "LogIn" -> AuthenticationController().OnLogInClick()
-            "Home" -> AuthenticationController().GoToHomePage()
+            "LogIn" -> authenticationController.OnLogInClick()
+            "Home" -> authenticationController.GoToHomePage()
             else -> SignUpScreen(
                 currentScreen,
                 showTermsAndPolicies,
@@ -515,8 +513,8 @@ class SignUpView {
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(12.dp)
-                            .scale(0.5f)
+                            .size(15.dp)
+                            .scale(0.7f)
                     ) {
                         Checkbox(
                             checked = isChecked.value,
@@ -547,31 +545,15 @@ class SignUpView {
 
                 Button(
                     onClick = {
-                        if (emailError) {
-                            errorMessage.value = "Invalid email format"
-                            isErrorVisible = true
-                        } else if (firstName.value.isEmpty() || lastName.value.isEmpty()) {
-                            errorMessage.value = "Please fill in all required fields"
-                            isErrorVisible = true
-                        } else if (birthDate.value.isEmpty()) {
-                            errorMessage.value = "Please select a birthdate"
-                            isErrorVisible = true
-                        } else if (passwordError) {
-                            errorMessage.value = "Password must be at least 8 characters long"
-                            isErrorVisible = true
-                        } else if(confirmPasswordError) {
-                            errorMessage.value = "Passwords do not match"
-                            isErrorVisible = true
-                        } else if (!isChecked.value) {
-                            errorMessage.value = "You must agree to the terms and conditions"
-                            isErrorVisible = true
-                        } else {
-                            AuthenticationController().validateCredentials(
+                        try {
+                            authenticationController.validateCredentials(
                                 email.value.text,
                                 firstName.value,
                                 lastName.value,
                                 birthDate.value,
-                                password.value
+                                password.value,
+                                confirmPassword.value,
+                                isChecked.value
                             ) { isSuccess ->
                                 if (isSuccess) {
                                     currentScreen.value = "Home"
@@ -581,6 +563,9 @@ class SignUpView {
                                     isErrorVisible = true
                                 }
                             }
+                        } catch (exception : IllegalArgumentException) {
+                            errorMessage.value = exception.message.toString()
+                            isErrorVisible = true
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -588,7 +573,8 @@ class SignUpView {
                     ),
                     modifier = Modifier
                         .width(200.dp)
-                        .align(Alignment.CenterHorizontally),
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 30.dp),
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(

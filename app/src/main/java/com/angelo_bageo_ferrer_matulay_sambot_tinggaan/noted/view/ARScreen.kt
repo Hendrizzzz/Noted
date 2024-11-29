@@ -1,5 +1,6 @@
 package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view
 
+import android.content.Context
 import android.widget.TextView
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
@@ -9,10 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.ar.core.Pose
+import androidx.core.math.MathUtils
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.rendering.ViewRenderable
+
 
 @Composable
 fun ARScreen() {
@@ -39,7 +42,7 @@ fun ARScreen() {
                     }
                 },
                 update = { sceneView ->
-                    // Handle updates like new notes to ArSceneView
+                    // Handle updates to ArSceneView if needed
                 }
             )
 
@@ -49,7 +52,7 @@ fun ARScreen() {
                     onDismiss = { showDialog = false },
                     onAddNote = { text ->
                         noteText = text
-                        //addNoteToScene(context, arSceneView, text)
+                        addNoteToScene(context, arSceneView, text)
                         showDialog = false
                     }
                 )
@@ -90,13 +93,28 @@ fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
     )
 }
 
-// Add Note Function Isnt Working Still Fixing
-
-private fun addNoteToScene(context: android.content.Context, arSceneView: ArSceneView?, noteText: String) {
+// Function to handle adding notes to the AR scene
+// This doesnt work well yet
+private fun addNoteToScene(context: Context, arSceneView: ArSceneView?, noteText: String) {
     if (arSceneView == null || arSceneView.session == null) return
 
-    // Creates the Ar Note
-    val pose = Pose(floatArrayOf(0f, -0.5f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
-    val anchor = arSceneView.session?.createAnchor(pose)
-    //val anchorNode = AnchorNode(anchor).apply { setParent(arSceneView) }
+    // Create an AR note at a fixed position
+    val anchor = arSceneView.session?.createAnchor(MathUtils.makeTranslation(0f, -0.5f, -1f))
+    val anchorNode = AnchorNode(anchor).apply {
+        setParent(arSceneView)
+    }
+
+    // Creates the renderable and attach it to the position
+    ViewRenderable.builder()
+        .setView(context, R.layout.ar_note_layout)
+        .build()
+        .thenAccept { renderable ->
+            renderable.view.findViewById<TextView>(R.id.noteTitle).text = "Note"
+            renderable.view.findViewById<TextView>(R.id.noteDescription).text = noteText
+            anchorNode.renderable = renderable
+        }
+}
+
+fun setParent(arSceneView: ArSceneView) {
+
 }
