@@ -1,6 +1,5 @@
 package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view
 
-import android.content.Context
 import android.util.Log
 import android.widget.TextView
 import androidx.compose.foundation.layout.*
@@ -11,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.math.MathUtils
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.google.ar.core.Pose
 import com.google.ar.sceneform.AnchorNode
@@ -26,6 +24,15 @@ fun ARScreen() {
     var showDialog by remember { mutableStateOf(false) }
     var arSceneView: ArSceneView? by remember { mutableStateOf(null) }
 
+    // Set up AR Scene
+    LaunchedEffect(context) {
+        arSceneView?.let {
+            if (it.session == null) {
+                Log.e("ARScreen", "AR session is not initialized")
+            }
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }) {
@@ -38,9 +45,9 @@ fun ARScreen() {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
-                    ArSceneView(ctx).also { sceneView ->
-                        sceneView.resume() // Ensure ARSceneView resumes correctly
-                        arSceneView = sceneView
+                    ArSceneView(ctx).apply {
+                        resume()  // Ensure ArSceneView is resumed when created
+                        arSceneView = this
                     }
                 },
                 update = { sceneView ->
@@ -62,6 +69,34 @@ fun ARScreen() {
         }
     }
 }
+
+private fun addNoteToScene(context: android.content.Context, arSceneView: ArSceneView?, noteText: String) {
+    if (arSceneView == null || arSceneView.session == null) return
+
+    // Create an AR anchor (pose)
+    val pose = Pose(floatArrayOf(0f, -0.5f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
+    val anchor = arSceneView.session?.createAnchor(pose)
+    val anchorNode = AnchorNode(anchor).apply {
+        setParent(arSceneView.scene)  // Attach to the scene
+    }
+
+    // Build the renderable and attach it to the anchor node
+    ViewRenderable.builder()
+        .setView(context, R.layout.ar_note_layout)
+        .build()
+        .thenAccept { renderable ->
+            renderable.view.findViewById<TextView>(R.id.noteTitle).text = "Note"
+            renderable.view.findViewById<TextView>(R.id.noteDescription).text = noteText
+            anchorNode.renderable = renderable
+        }
+        .exceptionally { throwable ->
+            Log.e("ARScreen", "Unable to load renderable", throwable)
+            null
+        }
+
+}
+
+
 
 @Composable
 fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
@@ -95,28 +130,4 @@ fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
     )
 }
 
-private fun addNoteToScene(context: android.content.Context, arSceneView: ArSceneView?, noteText: String) {
-    if (arSceneView == null || arSceneView.session == null) return
-
-    // Create an AR anchor
-    val pose = Pose(floatArrayOf(0f, -0.5f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
-    val anchor = arSceneView.session?.createAnchor(pose)
-    val anchorNode = AnchorNode(anchor).apply {
-        setParent(arSceneView.scene) // Attach to the scene
-    }
-
-    // Build the renderable and attach it to the anchor node
-    ViewRenderable.builder()
-        .setView(context, R.layout.ar_note_layout)
-        .build()
-        .thenAccept { renderable ->
-            renderable.view.findViewById<TextView>(R.id.noteTitle).text = "Note"
-            renderable.view.findViewById<TextView>(R.id.noteDescription).text = noteText
-            anchorNode.renderable = renderable
-        }
-        .exceptionally { throwable ->
-            Log.e("ARScreen", "Unable to load renderable", throwable)
-            null
-        }
-}
 
