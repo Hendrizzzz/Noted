@@ -513,8 +513,8 @@ class SignUpView(private val authenticationController: AuthenticationController)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(12.dp)
-                            .scale(0.5f)
+                            .size(15.dp)
+                            .scale(0.7f)
                     ) {
                         Checkbox(
                             checked = isChecked.value,
@@ -545,31 +545,15 @@ class SignUpView(private val authenticationController: AuthenticationController)
 
                 Button(
                     onClick = {
-                        if (emailError) {
-                            errorMessage.value = "Invalid email format"
-                            isErrorVisible = true
-                        } else if (firstName.value.isEmpty() || lastName.value.isEmpty()) {
-                            errorMessage.value = "Please fill in all required fields"
-                            isErrorVisible = true
-                        } else if (birthDate.value.isEmpty()) {
-                            errorMessage.value = "Please select a birthdate"
-                            isErrorVisible = true
-                        } else if (passwordError) {
-                            errorMessage.value = "Password must be at least 8 characters long"
-                            isErrorVisible = true
-                        } else if(confirmPasswordError) {
-                            errorMessage.value = "Passwords do not match"
-                            isErrorVisible = true
-                        } else if (!isChecked.value) {
-                            errorMessage.value = "You must agree to the terms and conditions"
-                            isErrorVisible = true
-                        } else {
+                        try {
                             authenticationController.validateCredentials(
                                 email.value.text,
                                 firstName.value,
                                 lastName.value,
                                 birthDate.value,
-                                password.value
+                                password.value,
+                                confirmPassword.value,
+                                isChecked.value
                             ) { isSuccess ->
                                 if (isSuccess) {
                                     currentScreen.value = "Home"
@@ -579,6 +563,9 @@ class SignUpView(private val authenticationController: AuthenticationController)
                                     isErrorVisible = true
                                 }
                             }
+                        } catch (exception : IllegalArgumentException) {
+                            errorMessage.value = exception.message.toString()
+                            isErrorVisible = true
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -586,7 +573,8 @@ class SignUpView(private val authenticationController: AuthenticationController)
                     ),
                     modifier = Modifier
                         .width(200.dp)
-                        .align(Alignment.CenterHorizontally),
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 30.dp),
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
