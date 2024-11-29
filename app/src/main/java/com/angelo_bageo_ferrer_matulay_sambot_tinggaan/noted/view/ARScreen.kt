@@ -3,6 +3,7 @@ package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view
 import android.content.Context
 import android.util.Log
 import android.widget.TextView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
@@ -11,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.math.MathUtils
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.google.ar.core.Pose
 import com.google.ar.sceneform.AnchorNode
@@ -33,7 +33,10 @@ fun ARScreen() {
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+        ) {
             // AR SceneView
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
