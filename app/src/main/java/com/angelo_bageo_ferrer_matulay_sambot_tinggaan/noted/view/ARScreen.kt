@@ -17,7 +17,6 @@ import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.rendering.ViewRenderable
 
-
 @Composable
 fun ARScreen() {
     val context = LocalContext.current
@@ -30,6 +29,9 @@ fun ARScreen() {
         arSceneView?.let {
             if (it.session == null) {
                 Log.e("ARScreen", "AR session is not initialized")
+            } else {
+                // Initialize session if not yet initialized
+                Log.d("ARScreen", "AR session initialized")
             }
         }
     }
@@ -56,6 +58,11 @@ fun ARScreen() {
                 },
                 update = { sceneView ->
                     // Handle updates to ArSceneView if needed
+                    arSceneView?.let {
+                        if (it.session == null) {
+                            Log.e("ARScreen", "AR session is null.")
+                        }
+                    }
                 }
             )
 
@@ -97,7 +104,6 @@ private fun addNoteToScene(context: android.content.Context, arSceneView: ArScen
             Log.e("ARScreen", "Unable to load renderable", throwable)
             null
         }
-
 }
 
 
