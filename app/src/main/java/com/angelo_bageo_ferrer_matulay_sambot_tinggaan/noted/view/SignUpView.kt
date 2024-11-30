@@ -25,6 +25,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,12 +86,18 @@ class SignUpView(private val authenticationController: AuthenticationController)
         if (showTermsAndPolicies.value) {
             AlertDialog(
                 onDismissRequest = { showTermsAndPolicies.value = false },
-                title = { Text("Terms and Policies") },
+                title = {
+                    Text(
+                        text = "Terms and Policies",
+                        fontSize = 20.sp
+                    )
+                },
                 text = {
                     Column(
                         modifier = Modifier
+                            .fillMaxWidth()
+                            .height(400.dp)
                             .verticalScroll(rememberScrollState())
-                            .padding(8.dp)
                     ) {
                         Text(buildTermsAndPoliciesText())
                     }
@@ -98,17 +105,16 @@ class SignUpView(private val authenticationController: AuthenticationController)
                 confirmButton = {
                     Button(
                         onClick = { showTermsAndPolicies.value = false },
-                        colors = ButtonDefaults.buttonColors
-                            (
+                        colors = ButtonDefaults.buttonColors(
                             containerColor = LogoColor,
                             contentColor = Color.White
                         )
-                    )
-                    {
+                    ) {
                         Text("Close")
                     }
                 },
-                modifier = Modifier.fillMaxSize().padding(0.dp, 50.dp)
+                modifier = Modifier
+                    .padding(0.dp)
             )
         }
 
@@ -215,20 +221,17 @@ class SignUpView(private val authenticationController: AuthenticationController)
 
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding
                         (
-                        0.dp,
-                        (screenHeight * 0.01f) + 166.dp,
-                        0.dp,
-                        16.dp
+                        screenWidth * 0.05f + 16.dp,
+                        130.dp,
+                        screenWidth * 0.05f + 16.dp,
+                        0.dp
                         )
                     .align(Alignment.Center)
+                    .width(600.dp)
             ) {
-                val paddingStart = (screenWidth - 600.dp) / 2
-                val finalPadding = if (paddingStart < 0.dp) 0.dp else paddingStart
-
                 // Email Label
                 Text(
                     text = "Email",
@@ -237,8 +240,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         fontSize = 18.sp
                     ),
                     modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(start = finalPadding, top = 8.dp)
+                        .padding(top = 8.dp)
                 )
 
                 val emailError = !Patterns.EMAIL_ADDRESS.matcher(email.value.text).matches()
@@ -246,9 +248,8 @@ class SignUpView(private val authenticationController: AuthenticationController)
                 // Email TextField
                 TextField(
                     modifier = Modifier
-                        .width(600.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                        .width(600.dp)  // Set the max width of the TextField
+                        .padding(top = 8.dp),  // Add some spacing between label and TextField
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.LightGray,
                         focusedIndicatorColor = LogoColor,
@@ -267,7 +268,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         color = Color.Red,
                         modifier = Modifier
                             .align(Alignment.Start)
-                            .padding(start = finalPadding))
+                    )
 
                 // First Name Label
                 Text(
@@ -277,7 +278,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         fontSize = 18.sp
                     ),
                     modifier = Modifier
-                        .padding(start = finalPadding, top = 8.dp)
+                        .padding(top = 8.dp)
                 )
 
                 // First name TextField
@@ -306,7 +307,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         fontSize = 18.sp
                     ),
                     modifier = Modifier
-                        .padding(start = finalPadding, top = 8.dp)
+                        .padding(top = 8.dp)
                 )
 
                 // Last Name TextField
@@ -335,7 +336,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         fontSize = 18.sp
                     ),
                     modifier = Modifier
-                        .padding(start = finalPadding, top = 8.dp)
+                        .padding(top = 8.dp)
                 )
 
                 // Birthdate TextField
@@ -391,7 +392,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         fontSize = 18.sp
                     ),
                     modifier = Modifier
-                        .padding(start = finalPadding, top = 8.dp)
+                        .padding(top = 8.dp)
                 )
 
                 // Password TextField
@@ -437,7 +438,8 @@ class SignUpView(private val authenticationController: AuthenticationController)
                     Text(
                         text = "Password must be at least 8 characters long",
                         color = Color.Red,
-                        modifier = Modifier.padding(start = finalPadding, top = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp)
+                            .align(Alignment.Start)
                     )
                 }
 
@@ -449,7 +451,8 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         fontSize = 18.sp
                     ),
                     modifier = Modifier
-                        .padding(start = finalPadding, top = 8.dp)
+                        .padding(top = 8.dp)
+                        .padding(16.dp, 0.dp)
                 )
 
                 // Confirm Password TextField with Show/Hide Toggle inside the field
@@ -496,7 +499,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                         text = "Passwords do not match",
                         color = Color.Red,
                         modifier = Modifier.
-                        padding(start = finalPadding, top = 8.dp)
+                        padding(top = 8.dp)
                     )
                 }
 
@@ -506,8 +509,7 @@ class SignUpView(private val authenticationController: AuthenticationController)
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 5.dp)
-                        .height(15.dp)
-                        .padding(start = finalPadding),
+                        .height(15.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -520,7 +522,12 @@ class SignUpView(private val authenticationController: AuthenticationController)
                             onCheckedChange = { isChecked.value = it },
                             modifier = Modifier
                                 .fillMaxSize()
-                                .align(Alignment.Center)
+                                .align(Alignment.Center),
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = LogoColor,
+                                uncheckedColor = Color.Black,
+                                checkmarkColor = Color.White // Color of the checkmark
+                            )
                         )
                     }
 
@@ -582,17 +589,6 @@ class SignUpView(private val authenticationController: AuthenticationController)
                     )
                 }
 
-
-                if (isErrorVisible)
-                    ErrorPopUp(errorMessage)
-
-                // Automatically hide the error message after 3 seconds
-                LaunchedEffect(isErrorVisible) {
-                    delay(3000)
-                    isErrorVisible = false
-                }
-
-
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -620,27 +616,41 @@ class SignUpView(private val authenticationController: AuthenticationController)
 
             }
         }
+
+        if (isErrorVisible)
+            ErrorPopUp(errorMessage)
+
+        // Automatically hide the error message after 3 seconds
+        LaunchedEffect(isErrorVisible) {
+            delay(3000)
+            isErrorVisible = false
+        }
     }
 
     @Composable
     fun ErrorPopUp(errorMessage: MutableState<String>) {
-        Popup(
-            alignment = Alignment.BottomCenter
+        Box(
+            modifier = Modifier.padding(bottom = 10.dp)
+                .fillMaxSize()
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .width(600.dp)
-                    .background(ErrorMessage, shape = RoundedCornerShape(20.dp))
-                    .padding(16.dp)
+            Popup(
+                alignment = Alignment.BottomCenter,
             ) {
-                Text(
-                    text = errorMessage.value,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .width(600.dp)
+                        .background(ErrorMessage, shape = RoundedCornerShape(20.dp))
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = errorMessage.value,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         }
     }
