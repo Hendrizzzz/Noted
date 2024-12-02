@@ -25,6 +25,7 @@ import com.google.ar.sceneform.rendering.ViewRenderable
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 
 class ARView {
+
     @Composable
     fun DisplayView() {
         Surface(color = MaterialTheme.colorScheme.background) {
@@ -53,9 +54,18 @@ class ARView {
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_RESUME -> arSceneView?.resume()
-                    Lifecycle.Event.ON_PAUSE -> arSceneView?.pause()
-                    Lifecycle.Event.ON_DESTROY -> arSceneView?.destroy()
+                    Lifecycle.Event.ON_RESUME -> {
+                        arSceneView?.resume()
+                        arSceneView?.session?.resume()
+                    }
+                    Lifecycle.Event.ON_PAUSE -> {
+                        arSceneView?.pause()
+                        arSceneView?.session?.pause()
+                    }
+                    Lifecycle.Event.ON_DESTROY -> {
+                        arSceneView?.destroy()
+                        arSceneView?.session?.close()
+                    }
                     else -> {}
                 }
             }
@@ -80,9 +90,9 @@ class ARView {
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
                         ArSceneView(ctx).apply {
-                            resume()
                             arSceneView = this
                             setupARSession(context)
+                            resume()
                         }
                     },
                     update = { sceneView ->
@@ -125,15 +135,18 @@ class ARView {
 
     private fun isARCoreInstalled(context: Context): Boolean {
         val availability = ArCoreApk.getInstance().checkAvailability(context)
+        Log.d("ARCore", "ARCore availability: $availability")
         return availability.isSupported && !availability.isTransient
     }
 
     private fun ArSceneView.setupARSession(context: Context) {
         try {
             val session = Session(context).apply {
-                configure(Config(this).apply {
+                val config = Config(this).apply {
                     planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
-                })
+                    updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+                }
+                configure(config)
             }
             this.setupSession(session)
         } catch (e: Exception) {
