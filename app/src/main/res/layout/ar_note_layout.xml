@@ -14,7 +14,8 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#3F51B5"
-        android:text="Title" />
+        android:text="Title"
+        android:fontFamily="@font/montserrat_medium.tff" />
 
     <TextView
         android:id="@+id/noteDescription"
@@ -23,6 +24,6 @@
         android:textSize="14sp"
         android:paddingTop="4dp"
         android:textColor="#757575"
-        android:text="Enter a Note!" />
+        android:text="Enter a Note!"
+        android:fontFamily="@font/montserrat_medium.tff" />
 </LinearLayout>
-

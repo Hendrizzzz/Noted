@@ -45,65 +45,40 @@ class ARView {
         var showDialog by remember { mutableStateOf(false) }
         var arSceneView: ArSceneView? by remember { mutableStateOf(null) }
 
-        // Check for Camera Permission
         CheckCameraPermission {
             if (!isARCoreInstalled(context)) {
-                Toast.makeText(context, "ARCore is not installed or supported.", Toast.LENGTH_LONG)
-                    .show()
+                Toast.makeText(context, "ARCore is not installed or supported.", Toast.LENGTH_LONG).show()
                 return@CheckCameraPermission
             }
         }
 
-        // Handle AR Lifecycle
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        arSceneView?.resume()
-                        arSceneView?.session?.resume()
-                    }
-
-                    Lifecycle.Event.ON_PAUSE -> {
-                        arSceneView?.pause()
-                        arSceneView?.session?.pause()
-                    }
-
-                    Lifecycle.Event.ON_DESTROY -> {
-                        arSceneView?.destroy()
-                        arSceneView?.session?.close()
-                    }
-
+                    Lifecycle.Event.ON_RESUME -> arSceneView?.resume()
+                    Lifecycle.Event.ON_PAUSE -> arSceneView?.pause()
+                    Lifecycle.Event.ON_DESTROY -> arSceneView?.destroy()
                     else -> {}
                 }
             }
             lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
 
         Scaffold(
             floatingActionButton = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp), // Adjust padding as needed
-                    contentAlignment = Alignment.BottomCenter // Proper alignment for the button
-                ) {
-                    FloatingActionButton(
-                        onClick = { showDialog = true }
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
-                    }
+                FloatingActionButton(onClick = { showDialog = true }) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
                 }
             },
-            floatingActionButtonPosition = FabPosition.Center // This remains optional if using Box for centering
+            floatingActionButtonPosition = FabPosition.Center
         ) { padding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
+                // AR View Setup
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
@@ -111,29 +86,47 @@ class ARView {
                             arSceneView = this
                             setupARSession(context)
                             resume()
+                            scene.setOnTouchListener { hitTestResult, motionEvent ->
+                                val frame = arSceneView?.arFrame
+                                if (frame != null && noteText.isNotEmpty()) {
+                                    val hitResults = frame.hitTest(motionEvent)
+                                    val validHit = hitResults.firstOrNull { hitResult ->
+                                        val trackable = hitResult.trackable
+                                        (trackable is Plane && trackable.isPoseInPolygon(hitResult.hitPose)) ||
+                                                (trackable is Point && trackable.orientationMode == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL)
+                                    }
+
+                                    if (validHit != null) {
+                                        val anchor = validHit.createAnchor()
+                                        addNoteToScene(context, this, noteText, anchor)
+                                        Toast.makeText(context, "Note added successfully!", Toast.LENGTH_SHORT).show()
+                                        noteText = ""
+                                    } else {
+                                        Toast.makeText(context, "No valid surface detected. Move the device slowly.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                true
+                            }
                         }
                     },
-                    update = { sceneView ->
-                        arSceneView = sceneView
+                    update = { sceneView -> arSceneView = sceneView }
+                )
+            }
+
+            if (showDialog) {
+                NoteDialog(
+                    onDismiss = { showDialog = false },
+                    onAddNote = { enteredText ->
+                        noteText = enteredText
+                        showDialog = false
+                        Toast.makeText(context, "Touch a surface in AR to place your note.", Toast.LENGTH_SHORT).show()
                     }
                 )
-
-                if (showDialog) {
-                    NoteDialog(
-                        onDismiss = { showDialog = false },
-                        onAddNote = { text ->
-                            noteText = text
-                            addNoteToScene(context, arSceneView, text)
-                            showDialog = false
-                        }
-                    )
-                }
             }
         }
     }
 
-
-        @Composable
+    @Composable
     private fun CheckCameraPermission(onPermissionGranted: () -> Unit) {
         val context = LocalContext.current
         val launcher = rememberLauncherForActivityResult(
@@ -142,7 +135,7 @@ class ARView {
             if (isGranted) {
                 onPermissionGranted()
             } else {
-                Toast.makeText(context, "Camera permission is required for AR functionality.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Camera permission is required for AR.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -164,12 +157,8 @@ class ARView {
                 val config = Config(this).apply {
                     planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
                     updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-
-                    // Check if depth mode is supported before enabling it
                     if (isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
                         depthMode = Config.DepthMode.AUTOMATIC
-                    } else {
-                        Log.w("ARCore", "Depth mode not supported.")
                     }
                 }
                 configure(config)
@@ -180,16 +169,8 @@ class ARView {
         }
     }
 
-
-    private fun addNoteToScene(context: Context, arSceneView: ArSceneView?, noteText: String) {
-        if (arSceneView == null || arSceneView.session == null) return
-
-        val pose = Pose(floatArrayOf(0f, 0f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
-        val anchor = arSceneView.session?.createAnchor(pose)
-        val anchorNode = AnchorNode(anchor).apply {
-            setParent(arSceneView.scene)
-        }
-
+    private fun addNoteToScene(context: Context, arSceneView: ArSceneView, noteText: String, anchor: Anchor) {
+        val anchorNode = AnchorNode(anchor).apply { setParent(arSceneView.scene) }
         ViewRenderable.builder()
             .setView(context, R.layout.ar_note_layout)
             .build()
@@ -197,16 +178,13 @@ class ARView {
                 val noteView = renderable.view
                 noteView.findViewById<TextView>(R.id.noteTitle).text = "Note"
                 noteView.findViewById<TextView>(R.id.noteDescription).text = noteText
-
                 anchorNode.renderable = renderable
-                Log.d("ARView", "Note successfully added")
             }
             .exceptionally { throwable ->
                 Log.e("ARView", "Renderable failed to load", throwable)
                 null
             }
     }
-
 
     @Composable
     private fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
@@ -227,18 +205,8 @@ class ARView {
                     )
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { onAddNote(inputText) }) {
-                    Text("Add")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Cancel")
-                }
-            }
+            confirmButton = { TextButton(onClick = { onAddNote(inputText) }) { Text("Add") } },
+            dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
         )
     }
-
-
 }
