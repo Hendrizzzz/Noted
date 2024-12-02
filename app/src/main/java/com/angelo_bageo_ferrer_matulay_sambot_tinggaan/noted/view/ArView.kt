@@ -22,6 +22,9 @@ import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.rendering.ViewRenderable
+import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 
 class ARView {
@@ -45,7 +48,8 @@ class ARView {
         // Check for Camera Permission
         CheckCameraPermission {
             if (!isARCoreInstalled(context)) {
-                Toast.makeText(context, "ARCore is not installed or supported.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "ARCore is not installed or supported.", Toast.LENGTH_LONG)
+                    .show()
                 return@CheckCameraPermission
             }
         }
@@ -58,14 +62,17 @@ class ARView {
                         arSceneView?.resume()
                         arSceneView?.session?.resume()
                     }
+
                     Lifecycle.Event.ON_PAUSE -> {
                         arSceneView?.pause()
                         arSceneView?.session?.pause()
                     }
+
                     Lifecycle.Event.ON_DESTROY -> {
                         arSceneView?.destroy()
                         arSceneView?.session?.close()
                     }
+
                     else -> {}
                 }
             }
@@ -77,14 +84,25 @@ class ARView {
 
         Scaffold(
             floatingActionButton = {
-                FloatingActionButton(onClick = { showDialog = true }) {
-                    Text("+")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp), // Adjust padding as needed
+                    contentAlignment = Alignment.BottomCenter // Proper alignment for the button
+                ) {
+                    FloatingActionButton(
+                        onClick = { showDialog = true }
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
+                    }
                 }
-            }
+            },
+            floatingActionButtonPosition = FabPosition.Center // This remains optional if using Box for centering
         ) { padding ->
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
@@ -114,7 +132,8 @@ class ARView {
         }
     }
 
-    @Composable
+
+        @Composable
     private fun CheckCameraPermission(onPermissionGranted: () -> Unit) {
         val context = LocalContext.current
         val launcher = rememberLauncherForActivityResult(
@@ -165,7 +184,7 @@ class ARView {
     private fun addNoteToScene(context: Context, arSceneView: ArSceneView?, noteText: String) {
         if (arSceneView == null || arSceneView.session == null) return
 
-        val pose = Pose(floatArrayOf(0f, -0.5f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
+        val pose = Pose(floatArrayOf(0f, 0f, -1f), floatArrayOf(0f, 0f, 0f, 1f))
         val anchor = arSceneView.session?.createAnchor(pose)
         val anchorNode = AnchorNode(anchor).apply {
             setParent(arSceneView.scene)
@@ -175,15 +194,19 @@ class ARView {
             .setView(context, R.layout.ar_note_layout)
             .build()
             .thenAccept { renderable ->
-                renderable.view.findViewById<TextView>(R.id.noteTitle).text = "Note"
-                renderable.view.findViewById<TextView>(R.id.noteDescription).text = noteText
+                val noteView = renderable.view
+                noteView.findViewById<TextView>(R.id.noteTitle).text = "Note"
+                noteView.findViewById<TextView>(R.id.noteDescription).text = noteText
+
                 anchorNode.renderable = renderable
+                Log.d("ARView", "Note successfully added")
             }
             .exceptionally { throwable ->
-                Log.e("ARScreen", "Unable to load renderable", throwable)
+                Log.e("ARView", "Renderable failed to load", throwable)
                 null
             }
     }
+
 
     @Composable
     private fun NoteDialog(onDismiss: () -> Unit, onAddNote: (String) -> Unit) {
@@ -216,4 +239,6 @@ class ARView {
             }
         )
     }
+
+
 }
