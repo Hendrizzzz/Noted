@@ -3,16 +3,17 @@ package com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller
 import android.util.Log
 import androidx.compose.runtime.Composable
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.main.MainController
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.model.User
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.LogInView
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.SignUpView
 import com.google.firebase.auth.FirebaseAuth
 
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AuthenticationController() {
+class AuthenticationController(private var user : User) {
     private val logInView = LogInView(this)
     private val signUpView = SignUpView(this)
-    private val mainController = MainController(this)
+    private val mainController = MainController(user, this)
     private var auth = FirebaseAuth.getInstance()
 
 
@@ -25,6 +26,49 @@ class AuthenticationController() {
         auth.signOut()
     }
 
+
+    fun fetchUserDetails() {
+        val currentUser = auth.currentUser
+
+        if (currentUser == null) {
+            Log.e("FetchUserDetails", "No authenticated user found.")
+            return
+        }
+
+        val userId = currentUser.uid
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Extract user details from Firestore
+                    val firstName = document.getString("firstName") ?: "Default First Name"
+                    val lastName = document.getString("lastName") ?: "Default Last Name"
+                    val birthDate = document.getString("birthDate") ?: "01-01-1970"
+                    val email = document.getString("email") ?: currentUser.email ?: "Unknown Email"
+                    val totalNoted = document.getLong("totalNoted")?.toInt() ?: 0
+                    val totalRated = document.getLong("totalRated")?.toInt() ?: 0
+                    val totalPlacesVisited = document.getLong("totalPlacesVisited")?.toInt() ?: 0
+
+                    // Update the user object
+                    user.setFirstName(firstName)
+                    user.setLastName(lastName)
+                    user.setEmail(email)
+                    user.setBirthDate(birthDate)
+                    user.setTotalNoted(totalNoted)
+                    user.setTotalRated(totalRated)
+                    user.setTotalPlacesVisited(totalPlacesVisited)
+
+                    Log.v("FetchUserDetails", "User details updated successfully.")
+                } else {
+                    Log.e("FetchUserDetails", "No user document found for userId: $userId")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("FetchUserDetails", "Failed to fetch user details: ${exception.message}")
+            }
+    }
 
 
 
@@ -42,15 +86,52 @@ class AuthenticationController() {
         if (email.isEmpty() || password.isEmpty())
             throw IllegalArgumentException("Email and password cannot be empty.")
 
+        // Attempt login with Firebase Authentication
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    callback (true)
-                }
-                else
+                    val currentUser = auth.currentUser
+                    val db = FirebaseFirestore.getInstance()
+
+                    currentUser?.let {
+                        val userRef = db.collection("users").document(it.uid)
+                        userRef.get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                    // Retrieve user data and update the `user` object
+                                    val firstName = document.getString("firstName") ?: "Default First Name"
+                                    val lastName = document.getString("lastName") ?: "Default Last Name"
+                                    val birthDate = document.getString("birthDate") ?: "01-01-1970"
+                                    val totalNoted = document.getLong("totalNoted")?.toInt() ?: 0
+                                    val totalRated = document.getLong("totalRated")?.toInt() ?: 0
+                                    val totalPlacesVisited = document.getLong("totalPlacesVisited")?.toInt() ?: 0
+
+                                    // Update user object
+                                    user.setFirstName(firstName)
+                                    user.setLastName(lastName)
+                                    user.setEmail(email)
+                                    user.setPassword(password)
+                                    user.setBirthDate(birthDate)
+                                    user.setTotalNoted(totalNoted)
+                                    user.setTotalRated(totalRated)
+                                    user.setTotalPlacesVisited(totalPlacesVisited)
+
+                                    // Ensure callback with success
+                                    callback(true)
+                                } else {
+                                    callback(false)
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                callback(false)
+                            }
+                    }
+                } else {
                     callback(false)
+                }
             }
     }
+
 
 
     /**
@@ -60,6 +141,7 @@ class AuthenticationController() {
     fun GoToHomePage() {
         mainController.AppNavigation()
     }
+
 
 
     /**
@@ -80,6 +162,12 @@ class AuthenticationController() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    user.setEmail(email)
+                    user.setFirstName(firstName)
+                    user.setLastName(lastName)
+                    user.setBirthDate(birthDate)
+                    user.setPassword(password)
+
                     val user = auth.currentUser
                     if (user != null) {
                         Log.v("User is not null after authentication", "hahaha")
@@ -88,7 +176,10 @@ class AuthenticationController() {
                             "firstName" to firstName,
                             "lastName" to lastName,
                             "birthDate" to birthDate,
-                            "email" to email
+                            "email" to email,
+                            "totalNoted" to 0,  // Initial value
+                            "totalRated" to 0,  // Initial value
+                            "totalPlacesVisited" to 0  // Initial value
                         )
 
                         Log.v("Time to log the details of the user", "Time to log the details of the user")
@@ -116,6 +207,8 @@ class AuthenticationController() {
             }
     }
 
+
+
     private fun validateInputs(
         email: String,
         firstName: String,
@@ -139,5 +232,10 @@ class AuthenticationController() {
             throw IllegalArgumentException("Passwords do not match.")
         else if (!isTermsAndPoliciesChecked)
             throw IllegalArgumentException("You must accept the terms and policies to continue.")
+    }
+
+
+    fun addNote(noteText: String) {
+        user.incrementNoted()
     }
 }

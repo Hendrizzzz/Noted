@@ -16,15 +16,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.model.User
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.SelectedColor
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.AccountView
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.ARView
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.view.MapView
 
-class MainController(private val authenticationController: AuthenticationController) {
-    private val arView = ARView()
+class MainController(private val user: User, private val authenticationController: AuthenticationController) {
+    private val arView = ARView(authenticationController)
     private val mapView = MapView()
-    private val accountView = AccountView()
+    private val accountView = AccountView(user, authenticationController)
 
     @Composable
     fun AppNavigation() {

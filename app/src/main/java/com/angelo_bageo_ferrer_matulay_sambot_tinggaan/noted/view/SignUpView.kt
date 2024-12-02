@@ -67,7 +67,7 @@ import java.util.Calendar
 
 // TODO : ADD A LOADING BUTTON WHEN SIGNING UP OR LOGGING IN
 
-class SignUpView(private val authenticationController: AuthenticationController) {
+class SignUpView(private var authenticationController: AuthenticationController) {
 
     @Composable
     fun DisplayView() {

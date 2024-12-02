@@ -26,8 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
+import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 
-class ARView {
+class ARView(private var authenticationController: AuthenticationController) {
 
     @Composable
     fun DisplayView() {
@@ -228,7 +229,9 @@ class ARView {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { onAddNote(inputText) }) {
+                TextButton(onClick = {
+                    authenticationController.addNote(inputText)
+                    onAddNote(inputText) }) {
                     Text("Add")
                 }
             },

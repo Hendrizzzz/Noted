@@ -46,7 +46,7 @@ import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.Background
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.ui.theme.LogoColor
 import kotlinx.coroutines.delay
 
-class SplashScreen(private val authenticationController: AuthenticationController) {
+class SplashScreen(private var authenticationController: AuthenticationController) {
 
     @Composable
     fun DisplayView() {
@@ -60,6 +60,7 @@ class SplashScreen(private val authenticationController: AuthenticationControlle
                 authenticationController.OnLogInClick()
             }
             composable("home") {
+                authenticationController.fetchUserDetails()
                 authenticationController.GoToHomePage()
             }
             composable("signup") {
