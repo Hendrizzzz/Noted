@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="Noted">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-11-29T13:28:42.310489700Z">
+        <DropdownSelection timestamp="2024-12-02T04:06:41.737693200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=HVA5DKHT" />

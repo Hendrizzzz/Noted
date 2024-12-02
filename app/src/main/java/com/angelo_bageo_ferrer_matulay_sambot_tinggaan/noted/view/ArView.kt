@@ -145,6 +145,13 @@ class ARView {
                 val config = Config(this).apply {
                     planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
                     updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+
+                    // Check if depth mode is supported before enabling it
+                    if (isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                        depthMode = Config.DepthMode.AUTOMATIC
+                    } else {
+                        Log.w("ARCore", "Depth mode not supported.")
+                    }
                 }
                 configure(config)
             }
@@ -153,6 +160,7 @@ class ARView {
             Log.e("ARScreen", "AR Session setup failed", e)
         }
     }
+
 
     private fun addNoteToScene(context: Context, arSceneView: ArSceneView?, noteText: String) {
         if (arSceneView == null || arSceneView.session == null) return

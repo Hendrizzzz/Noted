@@ -44,7 +44,7 @@ android {
 dependencies {
 
     // AR Dependencies
-    implementation ("com.google.ar:core:1.46.0")
+    implementation (libs.ar.core)
 
     // Firebase Dependencies
     implementation("com.google.firebase:firebase-database-ktx")
