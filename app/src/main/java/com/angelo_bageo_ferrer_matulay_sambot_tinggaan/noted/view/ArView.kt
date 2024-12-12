@@ -31,6 +31,10 @@ import com.google.ar.sceneform.rendering.ViewRenderable
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
 import com.google.ar.core.exceptions.UnavailableException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ARView(private var authenticationController: AuthenticationController) {
 
@@ -52,6 +56,7 @@ class ARView(private var authenticationController: AuthenticationController) {
         var showDialog by remember { mutableStateOf(false) }
         var noteReadyToPlace by remember { mutableStateOf(false) }
         var arSceneView: ArSceneView? by remember { mutableStateOf(null) }
+        var placementCooldown by remember { mutableStateOf(false) }
 
         CheckCameraPermission {
             if (!isARCoreInstalled(context)) {
@@ -103,21 +108,29 @@ class ARView(private var authenticationController: AuthenticationController) {
                             }
                             resume()
                             scene.setOnTouchListener { _, motionEvent ->
-                                if (noteReadyToPlace) {
+                                if (noteReadyToPlace && !placementCooldown) {
                                     val frame = session?.update()
                                     val hitResults = frame?.hitTest(motionEvent)
                                     val validHit = hitResults?.firstOrNull { hitResult ->
                                         val trackable = hitResult.trackable
-                                        (trackable is Plane && trackable.isPoseInPolygon(hitResult.hitPose)) ||
-                                                (trackable is Point && trackable.orientationMode == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL)
+                                        when (trackable) {
+                                            is Plane -> trackable.isPoseInPolygon(hitResult.hitPose)
+                                            is Point -> trackable.orientationMode == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL
+                                            else -> false
+                                        }
                                     }
 
                                     if (validHit != null) {
                                         val anchor = validHit.createAnchor()
                                         addNoteToScene(ctx, this, noteText, selectedRating, selectedColor, anchor)
                                         noteReadyToPlace = false
+                                        placementCooldown = true
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            delay(500) // Cooldown to avoid overlapping notes
+                                            placementCooldown = false
+                                        }
                                     } else {
-                                        Toast.makeText(ctx, "No surface detected. Move the device slowly.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(ctx, "No valid surface detected. Move the device slowly.", Toast.LENGTH_SHORT).show()
                                     }
                                 } else {
                                     Toast.makeText(ctx, "Press 'Add Note' to create a new note.", Toast.LENGTH_SHORT).show()
@@ -279,12 +292,12 @@ class ARView(private var authenticationController: AuthenticationController) {
             if (isGranted) {
                 onGranted()
             } else {
-                Toast.makeText(context, "Camera permission is required for AR.", Toast.LENGTH_LONG)
-                    .show()
+                Toast.makeText(context, "Camera permission is required for AR.", Toast.LENGTH_LONG).show()
             }
         }
     }
-    private fun isARCoreInstalled(context: Context): Boolean {
+
+        private fun isARCoreInstalled(context: Context): Boolean {
         return try {
             ArCoreApk.getInstance().checkAvailability(context).isSupported
         } catch (e: Exception) {
