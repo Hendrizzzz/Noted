@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -18,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -27,10 +28,9 @@ import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.rendering.ViewRenderable
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.border
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.R
 import com.angelo_bageo_ferrer_matulay_sambot_tinggaan.noted.controller.AuthenticationController
+import com.google.ar.core.exceptions.UnavailableException
 
 class ARView(private var authenticationController: AuthenticationController) {
 
@@ -44,12 +44,13 @@ class ARView(private var authenticationController: AuthenticationController) {
     @Composable
     private fun ARScreen() {
         val context = LocalContext.current
-        val lifecycleOwner = LocalLifecycleOwner.current
+        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
         var noteText by remember { mutableStateOf("") }
         var selectedRating by remember { mutableStateOf(1) }
         var selectedColor by remember { mutableStateOf(Color(0xFFFEDFA1)) }
         var showDialog by remember { mutableStateOf(false) }
+        var noteReadyToPlace by remember { mutableStateOf(false) }
         var arSceneView: ArSceneView? by remember { mutableStateOf(null) }
 
         CheckCameraPermission {
@@ -74,7 +75,13 @@ class ARView(private var authenticationController: AuthenticationController) {
 
         Scaffold(
             floatingActionButton = {
-                FloatingActionButton(onClick = { showDialog = true }) {
+                FloatingActionButton(onClick = {
+                    if (!noteReadyToPlace) {
+                        showDialog = true
+                    } else {
+                        Toast.makeText(context, "Place the current note first.", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
                 }
             },
@@ -85,29 +92,35 @@ class ARView(private var authenticationController: AuthenticationController) {
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // AR View Setup
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
                         ArSceneView(ctx).apply {
                             arSceneView = this
-                            setupARSession(context)
+                            if (!setupARSession(this, ctx)) {
+                                Log.e("ARView", "AR session setup failed.")
+                                return@apply
+                            }
                             resume()
                             scene.setOnTouchListener { _, motionEvent ->
-                                val frame = session?.update()
-                                val hitResults = frame?.hitTest(motionEvent)
-                                val validHit = hitResults?.firstOrNull { hitResult ->
-                                    val trackable = hitResult.trackable
-                                    (trackable is Plane && trackable.isPoseInPolygon(hitResult.hitPose)) ||
-                                            (trackable is Point && trackable.orientationMode == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL)
-                                }
+                                if (noteReadyToPlace) {
+                                    val frame = session?.update()
+                                    val hitResults = frame?.hitTest(motionEvent)
+                                    val validHit = hitResults?.firstOrNull { hitResult ->
+                                        val trackable = hitResult.trackable
+                                        (trackable is Plane && trackable.isPoseInPolygon(hitResult.hitPose)) ||
+                                                (trackable is Point && trackable.orientationMode == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL)
+                                    }
 
-                                if (validHit != null) {
-                                    val anchor = validHit.createAnchor()
-                                    addNoteToScene(context, this, noteText, selectedRating, selectedColor, anchor)
-                                    noteText = "" // Clear note after adding
+                                    if (validHit != null) {
+                                        val anchor = validHit.createAnchor()
+                                        addNoteToScene(ctx, this, noteText, selectedRating, selectedColor, anchor)
+                                        noteReadyToPlace = false
+                                    } else {
+                                        Toast.makeText(ctx, "No surface detected. Move the device slowly.", Toast.LENGTH_SHORT).show()
+                                    }
                                 } else {
-                                    Toast.makeText(context, "No surface detected. Move the device slowly.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(ctx, "Press 'Add Note' to create a new note.", Toast.LENGTH_SHORT).show()
                                 }
                                 true
                             }
@@ -125,10 +138,32 @@ class ARView(private var authenticationController: AuthenticationController) {
                         selectedRating = enteredRating
                         selectedColor = chosenColor
                         showDialog = false
+                        noteReadyToPlace = true // Allow adding the note
                         Toast.makeText(context, "Touch a surface in AR to place your note.", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
+        }
+    }
+
+    private fun setupARSession(arSceneView: ArSceneView, context: Context): Boolean {
+        return try {
+            val session = Session(context).apply {
+                val config = Config(this).apply {
+                    planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
+                    updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+                    if (isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                        depthMode = Config.DepthMode.AUTOMATIC
+                    }
+                }
+                configure(config)
+            }
+            arSceneView.setupSession(session)
+            true
+        } catch (e: UnavailableException) {
+            Log.e("ARSetup", "Failed to set up AR session: ${e.message}")
+            Toast.makeText(context, "AR setup failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            false
         }
     }
 
@@ -154,10 +189,7 @@ class ARView(private var authenticationController: AuthenticationController) {
                             .fillMaxWidth()
                             .padding(8.dp)
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // Rating Selection
                     Text("Rate your note:")
                     Row {
                         (1..5).forEach { rating ->
@@ -170,10 +202,7 @@ class ARView(private var authenticationController: AuthenticationController) {
                             )
                         }
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // Color Selection
                     Text("Choose a note color:")
                     Row(
                         modifier = Modifier
@@ -182,10 +211,10 @@ class ARView(private var authenticationController: AuthenticationController) {
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         listOf(
-                            Color(0xFFFEDFA1), // Light Beige
-                            Color(0xFFEEB72F), // Bright Yellow
-                            Color(0xFF905F19), // Brown
-                            Color(0xFF504F2B)  // Dark Olive
+                            Color(0xFFFEDFA1),
+                            Color(0xFFEEB72F),
+                            Color(0xFF905F19),
+                            Color(0xFF504F2B)
                         ).forEach { color ->
                             Box(
                                 modifier = Modifier
@@ -200,7 +229,7 @@ class ARView(private var authenticationController: AuthenticationController) {
             },
             confirmButton = {
                 TextButton(onClick = { onAddNote(inputText, selectedRating, selectedColor) }) {
-                    Text("Add")
+                    Text("Add Note")
                 }
             },
             dismissButton = {
@@ -230,6 +259,8 @@ class ARView(private var authenticationController: AuthenticationController) {
                 noteView.findViewById<TextView>(R.id.noteDescription).text = noteText
                 noteView.findViewById<TextView>(R.id.noteRating).text = "Rating: ${"⭐".repeat(noteRating)}"
                 noteView.setBackgroundColor(noteColor.toArgb())
+                renderable.isShadowCaster = false // Disable shadow casting
+                renderable.isShadowReceiver = false // Disable shadow receiving
                 anchorNode.renderable = renderable
             }
             .exceptionally { throwable ->
@@ -240,45 +271,24 @@ class ARView(private var authenticationController: AuthenticationController) {
     }
 
     @Composable
-    private fun CheckCameraPermission(onPermissionGranted: () -> Unit) {
+    private fun CheckCameraPermission(onGranted: () -> Unit) {
         val context = LocalContext.current
         val launcher = rememberLauncherForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted ->
             if (isGranted) {
-                onPermissionGranted()
+                onGranted()
             } else {
-                Toast.makeText(context, "Camera permission is required for AR.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Camera permission is required for AR.", Toast.LENGTH_LONG)
+                    .show()
             }
         }
-
-        DisposableEffect(Unit) {
-            launcher.launch(Manifest.permission.CAMERA)
-            onDispose { }
-        }
     }
-
     private fun isARCoreInstalled(context: Context): Boolean {
-        val availability = ArCoreApk.getInstance().checkAvailability(context)
-        Log.d("ARCore", "ARCore availability: $availability")
-        return availability.isSupported && !availability.isTransient
-    }
-
-    private fun ArSceneView.setupARSession(context: Context) {
-        try {
-            val session = Session(context).apply {
-                val config = Config(this).apply {
-                    planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
-                    updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-                    if (isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-                        depthMode = Config.DepthMode.AUTOMATIC
-                    }
-                }
-                configure(config)
-            }
-            this.setupSession(session)
+        return try {
+            ArCoreApk.getInstance().checkAvailability(context).isSupported
         } catch (e: Exception) {
-            Log.e("ARScreen", "AR Session setup failed", e)
+            false
         }
     }
 }
